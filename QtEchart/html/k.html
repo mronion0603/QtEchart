@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <!-- 引入 echarts.js -->
+    <script src="echarts.min.js"></script>
+    <script type="text/javascript" src="./qwebchannel.js"></script>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 1194px;height:650px;"></div>
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'), 'macarons');
+    var flag= 0 ;
+    var data1=[];
+    var data2=[];
+    var timea=[];
+    var dataX=[];
+    var seriesData=[];
+        // 指定图表的配置项和数据
+  var option = {
+                        title : {
+                            text: '2013年上半年上证指数'
+                        },
+                        tooltip : {
+                            trigger: 'axis',
+                            formatter: function (params) {
+                                var res = params[0].seriesName + ' ' + params[0].name;
+                                res += '<br/>  开盘 : ' + params[0].value[0] + '  最高 : ' + params[0].value[3];
+                                res += '<br/>  收盘 : ' + params[0].value[1] + '  最低 : ' + params[0].value[2];
+                                return res;
+                            }
+                        },
+                        legend: {
+                            data:['上证指数']
+                        },
+                        
+                        xAxis : [
+                            {
+                                type : 'category',
+                                boundaryGap : true,
+                                axisTick: {onGap:false},
+                                splitLine: {show:false},
+                                data : [
+                                   "2015/1/24", "2013/1/25"
+                                ]
+
+                            }
+                        ],
+                        yAxis : [
+                            {
+                                type : 'value',
+                                scale:true,
+                                boundaryGap: [0.01, 0.01]
+                            }
+                        ],
+                        series : [
+                            {
+                                name:'上证指数',
+                                type:'k',
+                                data:  [ // 开盘，收盘，最低，最高
+                                    [2320.26,2302.6,2287.3,2362.94],
+                                    [2300,2291.3,2288.26,2308.38]
+                                ]
+                            }
+                        ]
+                };
+
+
+ //myChart.setOption(option,true);
+/*!
+setInterval(function (){
+    option.series[0].data[0].value = (Math.random()*100).toFixed(2) - 0;
+    myChart.setOption(option,true);
+},2000);
+*/
+var updateChart = function(objdata) {
+     var obj = JSON.parse(objdata); 
+     //data1.push(obj.val1);
+    // dataX = ["2013/1/24", "2013/1/25", "2013/1/28", "2013/1/29"];
+                                    dataX = obj.dataX;
+                                    seriesData = obj.seriesData;
+     //dataX.push(obj.dataX);
+   //  seriesData = [[2320.26,2302.6,2287.3,2362.94],
+   //                                 [2300,2291.3,2288.26,2308.38],
+   //                                 [2295.35,2346.5,2295.35,2346.92],
+   //                                 [2347.22,2358.98,2337.35,2363.8]];
+     //seriesData.push(obj.seriesData)
+    //option.series[0].data.value=(obj.val1);
+    //option.series[1].data.value=(obj.val2);
+    if(flag<=0){
+    myChart.setOption({
+        title : {
+                            text: '2013年上半年上证指数'
+                        },
+                        tooltip : {
+                            trigger: 'axis',
+                            formatter: function (params) {
+                                var res = params[0].seriesName + ' ' + params[0].name;
+                                res += '<br/>  开盘 : ' + params[0].value[0] + '  最高 : ' + params[0].value[3];
+                                res += '<br/>  收盘 : ' + params[0].value[1] + '  最低 : ' + params[0].value[2];
+                                return res;
+                            }
+                        },
+                        legend: {
+                            data:['上证指数']
+                        },
+                
+                        xAxis : [
+                            {
+                                type : 'category',
+                                boundaryGap : true,
+                                axisTick: {onGap:false},
+                                splitLine: {show:false},
+                                data : dataX
+
+                            }
+                        ],
+                        yAxis : [
+                            {
+                                type : 'value',
+                                scale:true,
+                                boundaryGap: [0.01, 0.01]
+                            }
+                        ],
+                        series : [
+                            {
+                                name:'上证指数',
+                                type:'k',
+                                data: seriesData
+                            }
+                        ]
+        });
+        flag++;
+        }
+    }
+window.onload = function(){
+
+        new QWebChannel(qt.webChannelTransport,
+            function(channel) {
+                var m_jsContext = channel.objects.m_jsContext;
+                m_jsContext.sendtojsMsg.connect(updateChart);
+
+            }
+        );
+    }
+
+        // 使用刚指定的配置项和数据显示图表。
+        /*myChart.setOption(option);*/
+    </script>
+</body>
+</html>

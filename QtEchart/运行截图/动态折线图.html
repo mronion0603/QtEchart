@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <!-- 引入 echarts.js -->
+    <script type="text/javascript" src="./echarts.minline.js"></script>
+    <script type="text/javascript" src="./shine.js"></script>
+    <script type="text/javascript" src="./qwebchannel.js"></script>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+    <div id="main" style="width: 1194px;height:650px;"></div>
+    <script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'), 'shine');
+    var data1=[];
+    var data2=[];
+    var timea=[];
+    
+        // 指定图表的配置项和数据
+   option = {
+    title : {
+        text: '雨量流量关系图',
+        subtext: '数据来自西安兰特水电测控技术有限公司',
+        x: 'center',
+        align: 'right'
+    },
+    grid: {
+        bottom: 80
+    },
+    toolbox: {
+        feature: {
+            dataZoom: {
+                yAxisIndex: 'none'
+            },
+            restore: {},
+            saveAsImage: {}
+        }
+    },
+    tooltip : {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'cross',
+            animation: false,
+            label: {
+                backgroundColor: '#505765'
+            }
+        }
+    },
+    legend: {
+        data:['流量','降雨量'],
+        x: 'left'
+    },
+    dataZoom: [
+        {
+            show: true,
+            realtime: true,
+            start: 65,
+            end: 85
+        },
+        {
+            type: 'inside',
+            realtime: true,
+            start: 65,
+            end: 85
+        }
+    ],
+    xAxis : [
+        {
+            type : 'category',
+            boundaryGap : false,
+            axisLine: {onZero: false},
+            data : timea
+        }
+    ],
+    yAxis: [
+        {
+            name: '流量(m^3/s)',
+            type: 'value',
+            max: 1000
+        },
+        {
+            name: '降雨量(mm)',
+            nameLocation: 'start',
+            max: 1000,
+            type: 'value',
+            inverse: true
+        }
+    ],
+    series: [
+        {
+            
+            name:'流量',
+            type:'line',
+            animation: false,
+        
+            areaStyle: {
+            },
+            lineStyle: {
+                width: 1
+            },
+            markArea: {
+                silent: true,
+                data: [[{
+                    xAxis: '2009/9/12\n7:00'
+                }, {
+                    xAxis: '2009/9/22\n7:00'
+                }]]
+            },
+            data:data1
+        },
+        {
+            name:'降雨量',
+            type:'line',
+            yAxisIndex:1,
+            animation: false,
+
+            areaStyle: {
+            },
+            lineStyle: {
+                width: 1
+            },
+            markArea: {
+                silent: true,
+                data: [[{
+                    xAxis: '2009/9/10\n7:00'
+                }, {
+                    xAxis: '2009/9/20\n7:00'
+                }]]
+            },
+            data: data2
+        }
+    ]
+};
+
+ //myChart.setOption(option,true);
+/*!
+setInterval(function (){
+    option.series[0].data[0].value = (Math.random()*100).toFixed(2) - 0;
+    myChart.setOption(option,true);
+},2000);
+*/
+var updateChart = function(objdata) {
+     var obj = JSON.parse(objdata); 
+     data1.push(obj.val1);
+     data2.push(obj.val2);
+     timea.push(obj.time)
+    //option.series[0].data.value=(obj.val1);
+    //option.series[1].data.value=(obj.val2);
+    myChart.setOption(option,true);
+    }
+window.onload = function(){
+
+        new QWebChannel(qt.webChannelTransport,
+            function(channel) {
+                var m_jsContext = channel.objects.m_jsContext;
+                m_jsContext.sendtojsMsg.connect(updateChart);
+            }
+        );
+    }
+
+        // 使用刚指定的配置项和数据显示图表。
+        /*myChart.setOption(option);*/
+    </script>
+</body>
+</html>
